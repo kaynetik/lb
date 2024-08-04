@@ -8,3 +8,5 @@ internal/server/handler/output.txt
 
 # Stop tracking changes.
 output.txt
+
+internal/server/map/bench.json
