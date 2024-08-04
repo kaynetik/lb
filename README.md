@@ -22,7 +22,7 @@ Features
 - [x] Add one benchmark test
 - [x] Add multiple clients into `docker-compose` (primarily to demonstrate _"Clients can be added / removed / started
   while not inteferring to the server or other clients"_)
-- [ ] Initialize `promtail` and `loki` for logging
+- [x] Initialize `promtail` and `loki` for logging
 - [ ] Initialize `tempo` digester and compactor
 
 ## Usage
@@ -96,3 +96,9 @@ this with a higher time per operation.
 | BenchmarkOrderedMap_Delete_10K  | 5138942 | 232.8  | 15      | 1         |
 | BenchmarkOrderedMap_Delete_100K | 4704482 | 238.5  | 15      | 1         |
 
+## Observability
+
+If you wish to check the current state of the complete system, you can visit `http://localhost:3000` to access Grafana.
+By default `Loki` will be selected, and currently it's set to tail per-container logs.
+
+This wasn't a requirement, but I also wanted to have some fun on Sunday :joy:
