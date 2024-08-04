@@ -6,7 +6,7 @@ import (
 
 func AddItemHandler(opChan chan<- orderedmap.Operation, key, value string) {
 	opChan <- orderedmap.Operation{
-		Action: "add",
+		Action: orderedmap.Add,
 		Key:    key,
 		Value:  value,
 	}

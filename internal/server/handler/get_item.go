@@ -11,7 +11,7 @@ import (
 func GetItemHandler(obs observer.Observer, opChan chan<- orderedmap.Operation, key string) {
 	resultChan := make(chan interface{})
 	opChan <- orderedmap.Operation{
-		Action: "get",
+		Action: orderedmap.Get,
 		Key:    key,
 		Result: resultChan,
 	}
@@ -45,7 +45,7 @@ func GetItemHandler(obs observer.Observer, opChan chan<- orderedmap.Operation, k
 func GetAllItemsHandler(obs observer.Observer, opChan chan<- orderedmap.Operation) {
 	resultChan := make(chan interface{})
 	opChan <- orderedmap.Operation{
-		Action: "getAll",
+		Action: orderedmap.GetAll,
 		Result: resultChan,
 	}
 

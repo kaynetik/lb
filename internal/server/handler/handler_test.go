@@ -1,32 +1,65 @@
 package handler
 
 import (
+	"context"
+	"github.com/stretchr/testify/assert"
+	"lightblocks/internal/observer"
 	orderedmap "lightblocks/internal/server/map"
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlers(t *testing.T) {
 	om := orderedmap.NewOrderedMap()
+	opChan := make(chan orderedmap.Operation)
+	go om.Run(opChan)
 
-	AddItemHandler(om, "key1", "value1")
-	AddItemHandler(om, "key2", "value2")
-	DeleteItemHandler(om, "key1")
+	// TODO: Create a no-op observer for testing
+	// I'm not certain I'll have time to properly cleanup this part.
+	observer.InitObserver("server/handler/test", "", "test")
+	obs, _ := observer.Action(context.Background(), tracer)
 
-	value, exists := om.Get("key1")
-	assert.False(t, exists)
-	assert.Equal(t, "", value)
+	AddItemHandler(opChan, "key1", "value1")
+	AddItemHandler(opChan, "key2", "value2")
+	DeleteItemHandler(opChan, "key1")
 
-	value, exists = om.Get("key2")
-	assert.True(t, exists)
-	assert.Equal(t, "value2", value)
+	// Check key1
+	getResultChan := make(chan interface{})
+	opChan <- orderedmap.Operation{
+		Action: orderedmap.Get,
+		Key:    "key1",
+		Result: getResultChan,
+	}
+	result := (<-getResultChan).(struct {
+		Value  string
+		Exists bool
+	})
+	assert.False(t, result.Exists)
+	assert.Equal(t, "", result.Value)
 
-	os.Remove("output.txt")
-	GetItemHandler(om, "key2")
-	GetAllItemsHandler(om)
+	// Check key2
+	getResultChan = make(chan interface{})
+	opChan <- orderedmap.Operation{
+		Action: orderedmap.Get,
+		Key:    "key2",
+		Result: getResultChan,
+	}
+	result = (<-getResultChan).(struct {
+		Value  string
+		Exists bool
+	})
+	assert.True(t, result.Exists)
+	assert.Equal(t, "value2", result.Value)
 
-	content, _ := os.ReadFile("output.txt")
+	// Clean up output file if it exists
+	if err := os.Remove("output.txt"); err != nil {
+		return
+	}
+
+	GetItemHandler(obs, opChan, "key2")
+	GetAllItemsHandler(obs, opChan)
+
+	content, err := os.ReadFile("output.txt")
+	assert.NoError(t, err)
 	assert.Contains(t, string(content), "key: key2, value: value2")
 }

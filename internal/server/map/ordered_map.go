@@ -23,8 +23,17 @@ func NewOrderedMap() *OrderedMap {
 	}
 }
 
+type Action string
+
+const (
+	Add    Action = "add"
+	Delete Action = "delete"
+	Get    Action = "get"
+	GetAll Action = "getAll"
+)
+
 type Operation struct {
-	Action string
+	Action Action
 	Key    string
 	Value  string
 	Result chan interface{}
@@ -33,17 +42,17 @@ type Operation struct {
 func (om *OrderedMap) Run(opChan <-chan Operation) {
 	for op := range opChan {
 		switch op.Action {
-		case "add":
+		case Add:
 			om.add(op.Key, op.Value)
-		case "delete":
+		case Delete:
 			om.delete(op.Key)
-		case "get":
+		case Get:
 			value, exists := om.get(op.Key)
 			op.Result <- struct {
 				Value  string
 				Exists bool
 			}{value, exists}
-		case "getAll":
+		case GetAll:
 			op.Result <- om.getAll()
 		}
 	}

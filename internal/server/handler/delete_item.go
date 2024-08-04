@@ -6,7 +6,7 @@ import (
 
 func DeleteItemHandler(opChan chan<- orderedmap.Operation, key string) {
 	opChan <- orderedmap.Operation{
-		Action: "delete",
+		Action: orderedmap.Delete,
 		Key:    key,
 	}
 }
