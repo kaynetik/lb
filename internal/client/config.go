@@ -30,7 +30,7 @@ func ParseConfig() *Config {
 	// Populate ServiceConfig
 	flag.StringVar(&config.Name, "name", "client", "Name of the service")
 	flag.StringVar(&config.Environment, "env", "dev", "Environment of the service")
-	flag.StringVar(&config.OTELDigesterURL, "oteldigester", "", "URL of the OTEL digester") // TODO: Digester still not enabled.
+	flag.StringVar(&config.OTELDigesterURL, "oteldigester", "otel-collector:4317", "URL of the OTEL digester") // TODO: Digester still not enabled.
 
 	// Populate RabbitMQConfig
 	flag.StringVar(&config.DialTarget, "dial", "amqp://guest:guest@rabbitmq:5672/", "RabbitMQ dial target")
