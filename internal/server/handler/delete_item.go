@@ -4,6 +4,9 @@ import (
 	orderedmap "lightblocks/internal/server/map"
 )
 
-func DeleteItemHandler(om *orderedmap.OrderedMap, key string) {
-	om.Delete(key)
+func DeleteItemHandler(opChan chan<- orderedmap.Operation, key string) {
+	opChan <- orderedmap.Operation{
+		Action: "delete",
+		Key:    key,
+	}
 }

@@ -4,6 +4,10 @@ import (
 	orderedmap "lightblocks/internal/server/map"
 )
 
-func AddItemHandler(om *orderedmap.OrderedMap, key, value string) {
-	om.Add(key, value)
+func AddItemHandler(opChan chan<- orderedmap.Operation, key, value string) {
+	opChan <- orderedmap.Operation{
+		Action: "add",
+		Key:    key,
+		Value:  value,
+	}
 }

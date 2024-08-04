@@ -1,5 +1,107 @@
-addItem key1 value1
-addItem key2 value2
-getItem key1
-deleteItem key1
+addItem username1 john_doe
+addItem username2 jane_doe
+addItem product123 apple
+addItem product456 banana
+addItem city001 new_york
+addItem city002 los_angeles
+addItem movie01 inception
+addItem movie02 interstellar
+addItem animal01 tiger
+addItem animal02 lion
+getItem username1
+getItem product123
+getItem city001
+deleteItem username2
+deleteItem movie01
+deleteItem city002
+getAllItems
+addItem book01 1984
+addItem book02 brave_new_world
+addItem device01 iphone
+addItem device02 samsung_galaxy
+addItem game01 chess
+getItem book01
+getItem device01
+deleteItem product456
+deleteItem animal01
+getAllItems
+addItem language01 golang
+addItem language02 python
+addItem sport01 soccer
+addItem sport02 basketball
+addItem food01 sushi
+getItem language01
+getItem sport02
+deleteItem animal02
+deleteItem device02
+getAllItems
+addItem country01 usa
+addItem country02 canada
+addItem continent01 asia
+addItem continent02 europe
+addItem planet01 earth
+getItem country01
+getItem planet01
+deleteItem book02
+deleteItem game01
+getAllItems
+addItem artist01 picasso
+addItem artist02 van_gogh
+addItem song01 bohemian_rhapsody
+addItem song02 stairway_to_heaven
+addItem drink01 coffee
+getItem artist01
+getItem drink01
+deleteItem city001
+deleteItem movie02
+getAllItems
+addItem color01 blue
+addItem color02 green
+addItem vehicle01 tesla
+addItem vehicle02 ford
+addItem website01 google
+getItem color01
+getItem vehicle01
+deleteItem country02
+deleteItem sport01
+getAllItems
+addItem holiday01 christmas
+addItem holiday02 new_year
+addItem mountain01 everest
+addItem mountain02 k2
+addItem river01 nile
+getItem holiday01
+getItem mountain01
+deleteItem continent01
+deleteItem sport02
+getAllItems
+addItem flower01 rose
+addItem flower02 tulip
+addItem tree01 oak
+addItem tree02 pine
+addItem dessert01 ice_cream
+getItem flower01
+getItem dessert01
+deleteItem language02
+deleteItem device01
+getAllItems
+addItem hobby01 reading
+addItem hobby02 traveling
+addItem industry01 tech
+addItem industry02 finance
+addItem fruit01 mango
+getItem hobby01
+getItem fruit01
+deleteItem song01
+deleteItem vehicle02
+getAllItems
+addItem element01 hydrogen
+addItem element02 oxygen
+addItem star01 sun
+addItem star02 sirius
+addItem galaxy01 milky_way
+getItem element01
+getItem star01
+deleteItem drink01
+deleteItem artist02
 getAllItems

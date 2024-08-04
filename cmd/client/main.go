@@ -1,30 +1,48 @@
 package main
 
 import (
+	"context"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"lightblocks/internal/client"
-	"log"
+	"lightblocks/internal/observer"
 )
 
 func main() {
 	config := client.ParseConfig()
 
-	commands, err := client.ReadCommands(config.InputFile)
+	// TODO: Read digester and environment from the env vars.
+	observer.InitObserver("client", "TBD", "dev")
+
+	obs, ctx := observer.Action(context.Background(), tracer)
+
+	commands, err := client.ReadCommands(ctx, config.InputFile)
 	if err != nil {
-		log.Fatalf("Failed to read commands: %v", err)
+		obs.Err(err).Fatal("failed to read commands")
 	}
 
 	sender, err := client.NewSender(config.QueueName)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		obs.Err(err).Fatal("failed to connect to RabbitMQ")
 	}
 	defer sender.Close()
 
 	for _, command := range commands {
-		log.Println("Sending command", command)
-		err := sender.Send(command)
-		if err != nil {
-			log.Printf("Failed to send command: %v", err)
+		obs = obs.Str("command", command)
+		obs.Debug("sending command")
+
+		if err = sender.Send(command); err != nil {
+			obs.Err(err).Error("failed to send command")
 		}
-		log.Println("Command sent")
+
+		obs.Debug("command sent")
 	}
+}
+
+var (
+	tracer trace.Tracer
+)
+
+func init() {
+	tracer = otel.GetTracerProvider().Tracer("cmd/client")
 }

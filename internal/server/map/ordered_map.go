@@ -23,7 +23,33 @@ func NewOrderedMap() *OrderedMap {
 	}
 }
 
-func (om *OrderedMap) Add(key, value string) {
+type Operation struct {
+	Action string
+	Key    string
+	Value  string
+	Result chan interface{}
+}
+
+func (om *OrderedMap) Run(opChan <-chan Operation) {
+	for op := range opChan {
+		switch op.Action {
+		case "add":
+			om.add(op.Key, op.Value)
+		case "delete":
+			om.delete(op.Key)
+		case "get":
+			value, exists := om.get(op.Key)
+			op.Result <- struct {
+				Value  string
+				Exists bool
+			}{value, exists}
+		case "getAll":
+			op.Result <- om.getAll()
+		}
+	}
+}
+
+func (om *OrderedMap) add(key, value string) {
 	if n, exists := om.data[key]; exists {
 		n.kv.Value = value
 		return
@@ -45,7 +71,7 @@ func (om *OrderedMap) Add(key, value string) {
 	om.data[key] = newNode
 }
 
-func (om *OrderedMap) Delete(key string) {
+func (om *OrderedMap) delete(key string) {
 	if n, exists := om.data[key]; exists {
 		if n.prev != nil {
 			n.prev.next = n.next
@@ -61,14 +87,14 @@ func (om *OrderedMap) Delete(key string) {
 	}
 }
 
-func (om *OrderedMap) Get(key string) (string, bool) {
+func (om *OrderedMap) get(key string) (string, bool) {
 	if n, exists := om.data[key]; exists {
 		return n.kv.Value, true
 	}
 	return "", false
 }
 
-func (om *OrderedMap) GetAll() []KeyValuePair {
+func (om *OrderedMap) getAll() []KeyValuePair {
 	var result []KeyValuePair
 	for n := om.head; n != nil; n = n.next {
 		result = append(result, n.kv)
