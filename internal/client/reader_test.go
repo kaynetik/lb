@@ -1,13 +1,21 @@
 package client
 
 import (
+	"context"
+	"lightblocks/internal/observer"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	observer.InitObserver("server/handler/test", "", "test")
+
+}
 func TestReadCommandsFromStdin(t *testing.T) {
+	obs, ctx := observer.Action(context.Background(), tracer)
+
 	input := "command1\ncommand2\ncommand3\n"
 	r, w, _ := os.Pipe()
 	oldStdin := os.Stdin
@@ -18,7 +26,7 @@ func TestReadCommandsFromStdin(t *testing.T) {
 		w.Close()
 	}()
 
-	commands, err := readCommandsFromStdin()
+	commands, err := readCommandsFromStdin(ctx, obs)
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"command1", "command2", "command3"}, commands)
 
@@ -26,6 +34,8 @@ func TestReadCommandsFromStdin(t *testing.T) {
 }
 
 func TestReadCommandsFromFile(t *testing.T) {
+	obs, ctx := observer.Action(context.Background(), tracer)
+
 	input := "command1\ncommand2\ncommand3\n"
 	file, err := os.CreateTemp("", "testfile")
 	assert.NoError(t, err)
@@ -35,7 +45,7 @@ func TestReadCommandsFromFile(t *testing.T) {
 	assert.NoError(t, err)
 	file.Close()
 
-	commands, err := readCommandsFromFile(file.Name())
+	commands, err := readCommandsFromFile(ctx, obs, file.Name())
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"command1", "command2", "command3"}, commands)
 }

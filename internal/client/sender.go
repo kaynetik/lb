@@ -4,8 +4,14 @@ import (
 	"lightblocks/internal/server/queue"
 )
 
+type Queue interface {
+	Publish(message string) error
+	Consume(handler func(string)) error
+	Close()
+}
+
 type Sender struct {
-	rabbitMQ *queue.RabbitMQ
+	queue Queue
 }
 
 func NewSender(queueName string) (*Sender, error) {
@@ -13,13 +19,16 @@ func NewSender(queueName string) (*Sender, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Sender{rabbitMQ: rabbitMQ}, nil
+
+	return &Sender{
+		queue: rabbitMQ,
+	}, nil
 }
 
-func (s *Sender) Send(command string) error {
-	return s.rabbitMQ.Publish(command)
+func (s *Sender) Send(message string) error {
+	return s.queue.Publish(message)
 }
 
 func (s *Sender) Close() {
-	s.rabbitMQ.Close()
+	s.queue.Close()
 }

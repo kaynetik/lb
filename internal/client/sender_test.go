@@ -9,16 +9,15 @@ import (
 )
 
 func TestSender(t *testing.T) {
-	rabbitMQ, err := queue.NewRabbitMQ("testQueue")
-	assert.NoError(t, err)
-	defer rabbitMQ.Close()
+	mockRabbitMQ := queue.NewMockRabbitMQ()
 
-	sender, err := NewSender("testQueue")
-	assert.NoError(t, err)
+	sender := &Sender{
+		queue: mockRabbitMQ,
+	}
 	defer sender.Close()
 
 	messageReceived := make(chan string)
-	err = rabbitMQ.Consume(func(message string) {
+	err := mockRabbitMQ.Consume(func(message string) {
 		messageReceived <- message
 	})
 	assert.NoError(t, err)
