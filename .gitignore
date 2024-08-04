@@ -2,3 +2,6 @@
 .idea/*
 
 .nvim-scope
+
+# This is output from a test run.
+internal/server/handler/output.txt
