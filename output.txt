@@ -6,4 +6,3 @@ key: drink01, value: coffee
 key: artist01, value: picasso
 key: color01, value: blue
 key: vehicle01, value: tesla
-key: username1, value: john_doe

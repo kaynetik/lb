@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   rabbitmq:
     image: "rabbitmq:3-management"
@@ -29,7 +27,7 @@ services:
       - ./output.txt:/root/output.txt
     restart: on-failure
 
-  client:
+  client1:
     build:
       context: .
       dockerfile: ci/client/Dockerfile
@@ -41,5 +39,35 @@ services:
       RABBITMQ_PORT: 5672
     restart: on-failure
     volumes:
-      - ./commands.txt:/root/commands.txt
+      - ./commands1.txt:/root/commands.txt
+    command: [ "/root/client", "-queue", "commandQueue", "-input", "/root/commands.txt" ]
+
+  client2:
+    build:
+      context: .
+      dockerfile: ci/client/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: 5672
+    restart: on-failure
+    volumes:
+      - ./commands2.txt:/root/commands.txt
+    command: [ "/root/client", "-queue", "commandQueue", "-input", "/root/commands.txt" ]
+
+  client3:
+    build:
+      context: .
+      dockerfile: ci/client/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: 5672
+    restart: on-failure
+    volumes:
+      - ./commands3.txt:/root/commands.txt
     command: [ "/root/client", "-queue", "commandQueue", "-input", "/root/commands.txt" ]

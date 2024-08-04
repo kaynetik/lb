@@ -34,8 +34,8 @@ Only pre-requisite is Docker with Docker Compose.
 1. Clone the repo:
 
 ```bash
-git clone kyy
-cd mapper
+git clone git@github.com:kaynetik/lb.git
+cd lb
 ```
 
 2. Run with Docker Compose:

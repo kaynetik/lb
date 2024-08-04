@@ -57,12 +57,12 @@ func main() {
 	defer rabbitMQ.Close()
 
 	err = rabbitMQ.Consume(func(message string) {
-		go handleCommand(message, opChan)
+		go handleCommand(message, opChan) // If bigger lag were to occur this would be a bottleneck.
+		// To handle such scenario we could go the easy route, via a worker-pool [POND](github.com/alitto/pond) with an `Eager` strategy.
 	})
 	if err != nil {
 		log.Fatalf("Failed to start consuming messages: %v", err)
 	}
 
-	// Block forever
 	select {}
 }

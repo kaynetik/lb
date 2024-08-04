@@ -1,0 +1,3 @@
+addItem key3 value3
+getItem key3
+deleteItem key3
