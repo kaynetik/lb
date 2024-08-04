@@ -10,7 +10,7 @@ services:
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmqctl status"]
+      test: [ "CMD-SHELL", "rabbitmqctl status" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,6 +25,8 @@ services:
     environment:
       RABBITMQ_HOST: "rabbitmq"
       RABBITMQ_PORT: 5672
+    volumes:
+      - ./output.txt:/root/output.txt
     restart: on-failure
 
   client:
@@ -40,4 +42,4 @@ services:
     restart: on-failure
     volumes:
       - ./commands.txt:/root/commands.txt
-    command: ["/root/client", "-queue", "commandQueue", "-input", "/root/commands.txt"]
+    command: [ "/root/client", "-queue", "commandQueue", "-input", "/root/commands.txt" ]
