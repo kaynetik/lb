@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"lightblocks/internal/server"
 	"strings"
 
 	"go.opentelemetry.io/otel"
@@ -45,8 +46,8 @@ func handleCommand(command string, opChan chan<- orderedmap.Operation) {
 }
 
 func main() {
-	// TODO: Read digester and environment from the env vars.
-	observer.InitObserver("client", "TBD", "dev")
+	cfg := server.ParseConfig()
+	observer.InitObserver(cfg.Name, cfg.OTELDigesterURL, cfg.Environment)
 	obs, _ := observer.Action(context.Background(), tracer)
 
 	om := orderedmap.NewOrderedMap()
@@ -54,8 +55,7 @@ func main() {
 
 	go om.Run(opChan)
 
-	const dialTarget = "amqp://guest:guest@rabbitmq:5672/"
-	rabbitMQ, err := queue.NewRabbitMQ(dialTarget, "commandQueue")
+	rabbitMQ, err := queue.NewRabbitMQ(cfg.DialTarget, cfg.QueueName)
 	if err != nil {
 		obs.Err(err).Fatal("failed to connect to RabbitMQ")
 	}
