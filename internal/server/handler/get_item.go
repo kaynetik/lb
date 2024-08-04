@@ -2,10 +2,11 @@ package handler
 
 import (
 	"fmt"
-	"lightblocks/internal/observer"
-	orderedmap "lightblocks/internal/server/map"
 	"os"
 	"path/filepath"
+
+	"lightblocks/internal/observer"
+	orderedmap "lightblocks/internal/server/map"
 )
 
 func GetItemHandler(obs observer.Observer, opChan chan<- orderedmap.Operation, key string) {
@@ -28,7 +29,7 @@ func GetItemHandler(obs observer.Observer, opChan chan<- orderedmap.Operation, k
 		return
 	}
 
-	f, err := os.OpenFile("output.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("output.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		obs.Err(err).Error("failed to open output file")
 		return
@@ -51,7 +52,7 @@ func GetAllItemsHandler(obs observer.Observer, opChan chan<- orderedmap.Operatio
 
 	result := (<-resultChan).([]orderedmap.KeyValuePair)
 
-	f, err := os.OpenFile("./output.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("./output.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		obs.Err(err).Error("failed to open output file")
 		return

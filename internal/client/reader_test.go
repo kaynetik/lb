@@ -2,17 +2,18 @@ package client
 
 import (
 	"context"
-	"lightblocks/internal/observer"
 	"os"
 	"testing"
+
+	"lightblocks/internal/observer"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func init() {
 	observer.InitObserver("server/handler/test", "", "test")
-
 }
+
 func TestReadCommandsFromStdin(t *testing.T) {
 	obs, ctx := observer.Action(context.Background(), tracer)
 

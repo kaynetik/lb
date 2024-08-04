@@ -10,8 +10,8 @@ type RabbitMQ struct {
 	queueName  string
 }
 
-func NewRabbitMQ(queueName string) (*RabbitMQ, error) {
-	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+func NewRabbitMQ(dialTarget string, queueName string) (*RabbitMQ, error) {
+	conn, err := amqp.Dial(dialTarget)
 	if err != nil {
 		return nil, err
 	}

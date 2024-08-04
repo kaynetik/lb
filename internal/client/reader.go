@@ -3,8 +3,9 @@ package client
 import (
 	"bufio"
 	"context"
-	"lightblocks/internal/observer"
 	"os"
+
+	"lightblocks/internal/observer"
 )
 
 // NOTE: Observer that can be observed here is intended purely as a demonstration of a different ways to gather

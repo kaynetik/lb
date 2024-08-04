@@ -2,6 +2,8 @@ package observer
 
 import (
 	"context"
+	"log"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -11,15 +13,14 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
 )
 
 // InitTracer initializes the OTEL tracer
 func InitTracer(serviceName string, digesterURL string) {
 	ctx := context.Background()
 
-	//timedCtx, cancel := context.WithTimeout(ctx, time.Second*15)
-	//defer cancel()
+	// timedCtx, cancel := context.WithTimeout(ctx, time.Second*15)
+	// defer cancel()
 
 	conn, err := grpc.NewClient(digesterURL,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

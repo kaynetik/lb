@@ -2,11 +2,12 @@ package handler
 
 import (
 	"context"
+	"os"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"lightblocks/internal/observer"
 	orderedmap "lightblocks/internal/server/map"
-	"os"
-	"testing"
 )
 
 func TestHandlers(t *testing.T) {

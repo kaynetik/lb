@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	tp     = otel.GetTracerProvider()
 	tracer trace.Tracer
 )
 

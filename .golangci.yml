@@ -1,0 +1,40 @@
+run:
+  timeout: 5m
+  concurrency: 4
+  tests: false
+  allow-parallel-runners: true
+  go: '1.22'
+
+linters-settings:
+  staticcheck:
+    checks: [ "all" ]
+  gosimple:
+    checks: [ "all" ]
+  gofmt:
+    simplify: true
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  gocyclo:
+    min-complexity: 10
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - gosimple
+    - gofmt
+    - revive
+    - gofumpt
+    - gosec
+    - errcheck
+    - unused
+    - gocyclo
+    - ineffassign
+  presets:
+    - bugs
+    - complexity
+    - performance
+
+  enable-all: false
+  disable-all: false

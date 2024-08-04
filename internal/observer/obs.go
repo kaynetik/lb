@@ -3,20 +3,41 @@ package observer
 import (
 	"context"
 	"fmt"
+	"os"
+	"runtime"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"os"
-	"runtime"
-	"strings"
 )
 
 // NOTE: I didn't develop `observer` specifically for this example, but it's something that I tend to init on the simple projects.
 
-// Observer is a utility struct for logging and tracing. It encapsulates a Zerolog logger
+type Observer interface {
+	ChildAction(ctx context.Context, tracer trace.Tracer, funcName ...string) (Observer, context.Context)
+	Action(ctx context.Context, tracer trace.Tracer, funcName ...string) (Observer, context.Context)
+	Str(key, val string) Observer
+	UUID(key string, val uuid.UUID) Observer
+	Int(key string, val int) Observer
+	Bool(key string, val bool) Observer
+	Len(key string, val any) Observer
+	Any(key string, val any) Observer
+	Int64(key string, val int64) Observer
+	Float64(key string, val float64) Observer
+	Close()
+	Info(msg ...string)
+	Err(err error) Observer
+	Error(msg ...string)
+	Fatal(msg ...string)
+	Warn(msg ...string)
+	Debug(msg ...string)
+}
+
+// observerImpl is a utility struct for logging and tracing. It encapsulates a Zerolog logger
 // and an OpenTelemetry span for contextual logging and tracing.
-type Observer struct {
+type observerImpl struct {
 	logger      zerolog.Logger
 	span        trace.Span
 	environment string
@@ -37,7 +58,7 @@ func InitObserver(serviceName string, otelDigesterURL string, environment string
 		InitTracer(serviceName, otelDigesterURL)
 	}
 
-	globalObserver = Observer{
+	globalObserver = observerImpl{
 		logger:      newLogger,
 		environment: environment,
 	}
@@ -49,11 +70,11 @@ func Action(ctx context.Context, tracer trace.Tracer, funcName ...string) (Obser
 }
 
 // ChildAction creates a child span from the current span for a given action.
-func (o Observer) ChildAction(ctx context.Context, tracer trace.Tracer, funcName ...string) (Observer, context.Context) {
+func (o observerImpl) ChildAction(ctx context.Context, tracer trace.Tracer, funcName ...string) (Observer, context.Context) {
 	action := initActionFromOptionalInput(3, funcName...)
 
 	childCtx, childSpan := tracer.Start(ctx, action)
-	childObserver := Observer{
+	childObserver := observerImpl{
 		logger:      o.logger,
 		span:        childSpan,
 		environment: o.environment,
@@ -73,7 +94,7 @@ func (o Observer) ChildAction(ctx context.Context, tracer trace.Tracer, funcName
 }
 
 // Action creates or updates the Observer's span using the provided tracer, context, and action.
-func (o Observer) Action(ctx context.Context, tracer trace.Tracer, funcName ...string) (Observer, context.Context) {
+func (o observerImpl) Action(ctx context.Context, tracer trace.Tracer, funcName ...string) (Observer, context.Context) {
 	action := initActionFromOptionalInput(4, funcName...)
 
 	tCtx, span := tracer.Start(ctx, action)
@@ -132,7 +153,7 @@ func getCallingFuncName(depth int) string {
 }
 
 // Str adds a string attribute to both the logger and the span.
-func (o Observer) Str(key, val string) Observer {
+func (o observerImpl) Str(key, val string) Observer {
 	o.logger = o.logger.With().Str(key, val).Logger()
 	o.span.SetAttributes(attribute.String(key, val))
 
@@ -140,7 +161,7 @@ func (o Observer) Str(key, val string) Observer {
 }
 
 // UUID adds a UUID attribute to both the logger and the span.
-func (o Observer) UUID(key string, val uuid.UUID) Observer {
+func (o observerImpl) UUID(key string, val uuid.UUID) Observer {
 	o.logger = o.logger.With().Str(key, val.String()).Logger()
 	o.span.SetAttributes(attribute.String(key, val.String()))
 
@@ -148,7 +169,7 @@ func (o Observer) UUID(key string, val uuid.UUID) Observer {
 }
 
 // Int adds an integer attribute to both the logger and the span.
-func (o Observer) Int(key string, val int) Observer {
+func (o observerImpl) Int(key string, val int) Observer {
 	o.logger = o.logger.With().Int(key, val).Logger()
 	o.span.SetAttributes(attribute.Int(key, val))
 
@@ -156,7 +177,7 @@ func (o Observer) Int(key string, val int) Observer {
 }
 
 // Bool adds a boolean attribute to both the logger and the span.
-func (o Observer) Bool(key string, val bool) Observer {
+func (o observerImpl) Bool(key string, val bool) Observer {
 	o.logger = o.logger.With().Bool(key, val).Logger()
 	o.span.SetAttributes(attribute.Bool(key, val))
 
@@ -164,7 +185,7 @@ func (o Observer) Bool(key string, val bool) Observer {
 }
 
 // Len adds the length of a collection as an attribute to both the logger and the span.
-func (o Observer) Len(key string, val any) Observer {
+func (o observerImpl) Len(key string, val any) Observer {
 	var length int
 	switch v := val.(type) {
 	case string:
@@ -186,7 +207,7 @@ func (o Observer) Len(key string, val any) Observer {
 }
 
 // Any adds a generic attribute to both the logger and the span.
-func (o Observer) Any(key string, val any) Observer {
+func (o observerImpl) Any(key string, val any) Observer {
 	o.logger = o.logger.With().Interface(key, val).Logger()
 
 	switch v := val.(type) {
@@ -212,7 +233,7 @@ func (o Observer) Any(key string, val any) Observer {
 }
 
 // Int64 adds a 64-bit integer attribute to both the logger and the span.
-func (o Observer) Int64(key string, val int64) Observer {
+func (o observerImpl) Int64(key string, val int64) Observer {
 	o.logger = o.logger.With().Int64(key, val).Logger()
 	o.span.SetAttributes(attribute.Int64(key, val))
 
@@ -220,7 +241,7 @@ func (o Observer) Int64(key string, val int64) Observer {
 }
 
 // Float64 adds a 64-bit floating-point attribute to both the logger and the span.
-func (o Observer) Float64(key string, val float64) Observer {
+func (o observerImpl) Float64(key string, val float64) Observer {
 	o.logger = o.logger.With().Float64(key, val).Logger()
 	o.span.SetAttributes(attribute.Float64(key, val))
 
@@ -228,12 +249,12 @@ func (o Observer) Float64(key string, val float64) Observer {
 }
 
 // Close ends the current span. It MUST be called when the operation represented by the span is completed.
-func (o Observer) Close() {
+func (o observerImpl) Close() {
 	o.span.End()
 }
 
 // Info logs an informational message using the observer's logger.
-func (o Observer) Info(msg ...string) {
+func (o observerImpl) Info(msg ...string) {
 	if len(msg) == 0 {
 		o.logger.Info().Msg("")
 		return
@@ -242,7 +263,7 @@ func (o Observer) Info(msg ...string) {
 }
 
 // Err adds an error as a field to the logger and records it in the span.
-func (o Observer) Err(err error) Observer {
+func (o observerImpl) Err(err error) Observer {
 	o.logger = o.logger.With().Err(err).Logger()
 	o.span.RecordError(err)
 
@@ -250,7 +271,7 @@ func (o Observer) Err(err error) Observer {
 }
 
 // Error logs an error message using the observer's logger.
-func (o Observer) Error(msg ...string) {
+func (o observerImpl) Error(msg ...string) {
 	if len(msg) == 0 {
 		o.logger.Error().Msg("")
 		return
@@ -258,7 +279,7 @@ func (o Observer) Error(msg ...string) {
 	o.logger.Error().Msg(strings.Join(msg, " "))
 }
 
-func (o Observer) Fatal(msg ...string) {
+func (o observerImpl) Fatal(msg ...string) {
 	if len(msg) == 0 {
 		o.logger.Fatal().Msg("")
 		return
@@ -267,7 +288,7 @@ func (o Observer) Fatal(msg ...string) {
 }
 
 // Warn logs a warning message using the observer's logger.
-func (o Observer) Warn(msg ...string) {
+func (o observerImpl) Warn(msg ...string) {
 	if len(msg) == 0 {
 		o.logger.Warn().Msg("")
 		return
@@ -276,7 +297,7 @@ func (o Observer) Warn(msg ...string) {
 }
 
 // Debug logs a debug message using the observer's logger.
-func (o Observer) Debug(msg ...string) {
+func (o observerImpl) Debug(msg ...string) {
 	if len(msg) == 0 {
 		o.logger.Debug().Msg("")
 		return

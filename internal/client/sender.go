@@ -14,8 +14,8 @@ type Sender struct {
 	queue Queue
 }
 
-func NewSender(queueName string) (*Sender, error) {
-	rabbitMQ, err := queue.NewRabbitMQ(queueName)
+func NewSender(dialTarget string, queueName string) (*Sender, error) {
+	rabbitMQ, err := queue.NewRabbitMQ(dialTarget, queueName)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"lightblocks/internal/client"
@@ -9,19 +10,16 @@ import (
 )
 
 func main() {
-	config := client.ParseConfig()
-
-	// TODO: Read digester and environment from the env vars.
-	observer.InitObserver("client", "TBD", "dev")
-
+	cfg := client.ParseConfig()
+	observer.InitObserver(cfg.Name, cfg.OTELDigesterURL, cfg.Environment)
 	obs, ctx := observer.Action(context.Background(), tracer)
 
-	commands, err := client.ReadCommands(ctx, config.InputFile)
+	commands, err := client.ReadCommands(ctx, cfg.InputFile)
 	if err != nil {
 		obs.Err(err).Fatal("failed to read commands")
 	}
 
-	sender, err := client.NewSender(config.QueueName)
+	sender, err := client.NewSender(cfg.DialTarget, cfg.QueueName)
 	if err != nil {
 		obs.Err(err).Fatal("failed to connect to RabbitMQ")
 	}
@@ -39,9 +37,7 @@ func main() {
 	}
 }
 
-var (
-	tracer trace.Tracer
-)
+var tracer trace.Tracer
 
 func init() {
 	tracer = otel.GetTracerProvider().Tracer("cmd/client")

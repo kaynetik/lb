@@ -12,4 +12,5 @@ func TestParseConfig(t *testing.T) {
 	config := ParseConfig()
 	assert.Equal(t, "testQueue", config.QueueName)
 	assert.Equal(t, "test.txt", config.InputFile)
+	assert.Equal(t, "amqp://guest:guest@rabbitmq:5672/", config.DialTarget)
 }

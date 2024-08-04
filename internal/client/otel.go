@@ -5,10 +5,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-var (
-	tp     = otel.GetTracerProvider()
-	tracer trace.Tracer
-)
+var tracer trace.Tracer
 
 func init() {
 	tracer = otel.GetTracerProvider().Tracer("internal/client")

@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
+	"strings"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"lightblocks/internal/observer"
 	"lightblocks/internal/server/handler"
 	"lightblocks/internal/server/map"
 	"lightblocks/internal/server/queue"
-	"log"
-	"strings"
 )
 
 var tracer trace.Tracer
@@ -45,14 +45,19 @@ func handleCommand(command string, opChan chan<- orderedmap.Operation) {
 }
 
 func main() {
+	// TODO: Read digester and environment from the env vars.
+	observer.InitObserver("client", "TBD", "dev")
+	obs, _ := observer.Action(context.Background(), tracer)
+
 	om := orderedmap.NewOrderedMap()
 	opChan := make(chan orderedmap.Operation)
 
 	go om.Run(opChan)
 
-	rabbitMQ, err := queue.NewRabbitMQ("commandQueue")
+	const dialTarget = "amqp://guest:guest@rabbitmq:5672/"
+	rabbitMQ, err := queue.NewRabbitMQ(dialTarget, "commandQueue")
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		obs.Err(err).Fatal("failed to connect to RabbitMQ")
 	}
 	defer rabbitMQ.Close()
 
@@ -61,7 +66,7 @@ func main() {
 		// To handle such scenario we could go the easy route, via a worker-pool [POND](github.com/alitto/pond) with an `Eager` strategy.
 	})
 	if err != nil {
-		log.Fatalf("Failed to start consuming messages: %v", err)
+		obs.Err(err).Fatal("failed to start consuming messages")
 	}
 
 	select {}
